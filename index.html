@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weird, Whimsy & Wonder</title>
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mystery+Quest&display=swap" rel="stylesheet">
+ 
+  <style>
+   :root{
+      --bg: #34a79c;
+      --ink: #1f1f1f;
+      --muted: #5a554b;
+
+      --card: #fff7e6;
+      --field: #cef0e6;
+      --field-ink: #1f1f1f;
+
+      --accent: #ffb100;
+      --line: rgba(0,0,0,.12);
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+
+      --radius: 18px;
+      --radius-sm: 12px;
+
+      /* Dock sizing */
+      --dock-gap: 16px;
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: "Fraunces", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.35;
+      min-height: 100vh;
+      /* Padding bottom is handled by JS ResizeObserver now to be exact */
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 4px 16px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      user-select:none;
+    }
+
+    .logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: radial-gradient(circle at 30% 30%, #ffe199, #ffb100);
+      box-shadow: var(--shadow);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform 0.1s;
+    }
+    .logo:active{ transform: scale(0.95); }
+
+    .brand h1{
+      margin:0;
+      line-height: 1.1;
+      font-size: clamp(20px, 4vw, 36px);
+      font-family: "Mystery Quest", cursive;
+      font-weight: 400;
+      letter-spacing: .2px;
+      color: white;
+      text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+    }
+
+    .actions{ display:flex; gap: 10px; align-items:center; }
+
+    .btn{
+      appearance:none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor:pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
+      transition: transform 0.1s;
+    }
+    .btn.primary{
+      background: var(--accent);
+      color: white;
+      font-size: clamp(10px, 2.5vw, 15px);
+      border-color: rgba(0,0,0,.18);
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .grid{ display:grid; gap: 14px; }
+
+    .card{
+      /* ORIGINAL TRANSPARENCY & BLUR */
+      background: rgba(255,255,255,.45);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .card h2{
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 8px;
+      color: #2b2b2b;
+    }
+
+    .section-roll{
+      font-size: 12px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px dashed rgba(0,0,0,.25);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor:pointer;
+      transition: background 0.2s;
+    }
+    .section-roll:hover{ background: rgba(255,255,255,.35); }
+
+    /* --- FIELDS --- */
+    .field{
+      width: 100%;
+      text-align:left;
+      border: 1px solid rgba(0,0,0,.10);
+      background: var(--field);
+      color: var(--field-ink);
+      border-radius: var(--radius-sm);
+      
+      /* KEY FIX: Consistent Height & Alignment */
+      height: 40px; 
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+
+      font-weight: 600;
+      font-size: clamp(12px, 2.5vw, 13px);
+      font-family: inherit;
+      cursor:pointer;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .field:active{ transform: translateY(1px); }
+
+    /* Flash Animation Class (The "Juice") */
+    .flash { animation: flashAnim 0.4s ease-out; }
+    @keyframes flashAnim {
+      0% { background-color: #fff; transform: scale(1.02); }
+      100% { background-color: var(--field); transform: scale(1); }
+    }
+
+    .field-row{ display:grid; gap: 10px; }
+
+    /* Layout helpers */
+    .two-col{ display:grid; gap: 14px; grid-template-columns: 1fr; }
+    @media (min-width: 760px){ .two-col{ grid-template-columns: 1fr 1fr; } }
+
+    .three-col{ display:grid; gap: 14px; grid-template-columns: 1fr; }
+    @media (min-width: 860px){ .three-col{ grid-template-columns: 1fr 1fr 1fr; } }
+
+    /* Details blocks */
+    details{
+      margin-top: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+    summary{
+      cursor:pointer;
+      color: #2b2b2b;
+      font-weight: 700;
+      list-style:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+
+    .small{
+      color: #2b2b2b;
+      font-size: 13px;
+      margin: 8px 0 0;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .inline-actions{ display:flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+
+    .mini{
+      appearance:none;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 800;
+      cursor:pointer;
+      font-size: 12px;
+    }
+    .mini:active{ transform: translateY(1px); }
+
+    /* Entry rows */
+    .entry-row{
+      display:grid;
+      grid-template-columns: 1fr 40px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .add{
+      appearance:none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      font-weight: 900;
+      cursor:pointer;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+      display:grid;
+      place-items:center;
+      line-height: 1;
+    }
+    .add:active{ transform: translateY(1px); }
+
+    /* Flavor rows */
+    .flavor-row{
+      display:grid;
+      grid-template-columns: 90px 1fr;
+      gap: 10px;
+      align-items:center;
+    }
+    .flavor-label{
+      font-weight: 900;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: #2b2b2b;
+      font-size: 12px;
+      opacity: .9;
+    }
+
+    /* Scratchpad */
+    .scratch{ display:grid; gap: 10px; }
+
+    textarea{
+      width: 100%;
+      min-height: 160px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font: inherit;
+      font-size: clamp(13px, 2.5vw, 16px);
+      line-height: 1.6;
+      box-shadow: 0 8px 18px rgba(0,0,0,.05);
+      background: rgba(255,255,255,.85);
+      color: var(--ink);
+    }
+
+    /* --- DOCKED SCRATCHPAD --- */
+    .scratch-dock{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: var(--dock-gap);
+      width: min(980px, calc(100% - 28px));
+      z-index: 999;
+      
+      /* BLUR & TRANSPARENCY STRIP */
+      padding: 10px 12px 12px;
+      background: rgba(255,255,255,.10);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: calc(var(--radius) + 6px);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+
+    .scratchpad-card{
+      margin: 0;
+      /* ORIGINAL INNER CARD STYLE */
+      background: rgba(255,255,255,.30);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 -10px 24px rgba(0,0,0,.10);
+      padding: 14px;
+    }
+
+    .scratchpad-card textarea{
+      min-height: 110px;
+      max-height: 28vh;
+      resize: vertical;
+    }
+
+    /* --- TOAST --- */
+    .toast{
+      position: fixed;
+      left: 50%;
+      top: 80px; /* Kept original position */
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.86);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .2s ease;
+      max-width: min(92vw, 520px);
+      text-align:center;
+      z-index: 2000;
+    }
+    .toast.show{ opacity: 1; }    
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" id="logoBtn" title="Click me.">🌀</div>
+        <div>
+          <h1>Weird, Whimsy & Wonder</h1>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="rollAllBtn">Roll all</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card" data-section="subject">
+        <h2>Subject</h2>
+        <div class="field-row">
+          <button class="field" id="subjectField" data-action="roll-field" data-field="subject">—</button>
+          <div class="inline-actions">
+            <button class="mini" data-action="stash" data-field="subject">+ Save</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="two-col">
+        <section class="card" data-section="trait">
+          <h2>Trait</h2>
+          <div class="field-row">
+            <button class="field" id="traitField" data-action="roll-field" data-field="trait">—</button>
+
+            <details id="traitDetails">
+              <summary>Details ▾</summary>
+              <p class="small" id="traitDesc">—</p>
+            </details>
+
+            <div class="inline-actions">
+              <button class="mini" data-action="stash" data-field="trait">+ Save</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" data-section="shift">
+          <h2>Shift</h2>
+          <div class="field-row">
+            <button class="field" id="shiftField" data-action="roll-field" data-field="shift">—</button>
+
+            <details id="shiftDetails">
+              <summary>Details ▾</summary>
+              <p class="small" id="shiftDesc">—</p>
+            </details>
+
+            <div class="inline-actions">
+              <button class="mini" data-action="stash" data-field="shift">+ Save</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="three-col">
+        <section class="card" data-section="seeds">
+          <h2>
+            Seeds
+            <button class="section-roll" data-action="roll-section" data-section="seeds">Roll section</button>
+          </h2>
+
+          <div class="field-row">
+            <div class="entry-row">
+              <button class="field" id="seed1Field" data-action="roll-field" data-field="seed1">—</button>
+              <button class="add" title="Save this seed" data-action="stash-single" data-kind="seed" data-slot="1">+</button>
+            </div>
+
+            <div class="entry-row">
+              <button class="field" id="seed2Field" data-action="roll-field" data-field="seed2">—</button>
+              <button class="add" title="Save this seed" data-action="stash-single" data-kind="seed" data-slot="2">+</button>
+            </div>
+
+            <div class="entry-row">
+              <button class="field" id="seed3Field" data-action="roll-field" data-field="seed3">—</button>
+              <button class="add" title="Save this seed" data-action="stash-single" data-kind="seed" data-slot="3">+</button>
+            </div>
+
+            <div class="inline-actions">
+              <button class="mini" data-action="stash" data-field="seeds">+ Save all</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" data-section="flavor">
+          <h2>
+            Flavor tags
+            <button class="section-roll" data-action="roll-section" data-section="flavor">Roll section</button>
+          </h2>
+
+          <div class="field-row">
+            <div class="flavor-row">
+              <div class="flavor-label">Weird</div>
+              <div class="flavor-right">
+                <div class="entry-row">
+                  <button class="field" id="weirdField" data-action="roll-field" data-field="weird">—</button>
+                  <button class="add" title="Save Weird tag" data-action="stash-single" data-kind="flavor" data-flavor="Weird">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flavor-row">
+              <div class="flavor-label">Whimsy</div>
+              <div class="flavor-right">
+                <div class="entry-row">
+                  <button class="field" id="whimsyField" data-action="roll-field" data-field="whimsy">—</button>
+                  <button class="add" title="Save Whimsy tag" data-action="stash-single" data-kind="flavor" data-flavor="Whimsy">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flavor-row">
+              <div class="flavor-label">Wonder</div>
+              <div class="flavor-right">
+                <div class="entry-row">
+                  <button class="field" id="wonderField" data-action="roll-field" data-field="wonder">—</button>
+                  <button class="add" title="Save Wonder tag" data-action="stash-single" data-kind="flavor" data-flavor="Wonder">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="inline-actions">
+              <button class="mini" data-action="stash" data-field="flavor">+ Save all</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" data-section="framing">
+          <h2>
+            Framing
+            <button class="section-roll" data-action="roll-section" data-section="framing">Roll section</button>
+          </h2>
+
+          <div class="field-row">
+            <div class="entry-row">
+              <button class="field" id="frame1Field" data-action="roll-field" data-field="frame1">—</button>
+              <button class="add" title="Save this framing" data-action="stash-single" data-kind="framing" data-slot="1">+</button>
+            </div>
+
+            <div class="entry-row">
+              <button class="field" id="frame2Field" data-action="roll-field" data-field="frame2">—</button>
+              <button class="add" title="Save this framing" data-action="stash-single" data-kind="framing" data-slot="2">+</button>
+            </div>
+
+            <div class="entry-row">
+              <button class="field" id="frame3Field" data-action="roll-field" data-field="frame3">—</button>
+              <button class="add" title="Save this framing" data-action="stash-single" data-kind="framing" data-slot="3">+</button>
+            </div>
+
+            <div class="inline-actions">
+              <button class="mini" data-action="stash" data-field="framing">+ Save all</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <div class="scratch-dock" id="scratchDock">
+        <section class="card scratchpad-card">
+          <h2>Scratchpad</h2>
+          <div class="scratch">
+            <textarea id="scratchpad" placeholder="Saved lines show up here…"></textarea>
+            <div class="inline-actions">
+              <button class="mini" id="copyBtn">Copy</button>
+              <button class="mini" id="clearBtn">Clear</button>
+              <button class="mini" id="undoBtn">Undo</button>
+            </div>
+            <p class="small">Tip: click any field to roll it. Use + buttons to save one entry, or “Save all” to save the section.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /*****************************************************************
+     * 1) DATA
+     *****************************************************************/
+    const OPTIONS = {
+        subject: [
+            "LOCATION — A specific place, site, or bounded area the party can enter or explore.",
+            "ITEM — Any discrete object, tool, weapon, relic, or possession, mundane or magical.",
+            "EVENT — A moment in time or unfolding occurrence, planned or spontaneous.",
+            "CREATURE — A non-human living entity, whether natural, fantastical, sentient or monstrous.",
+            "PERSON — A human or humanoid character with agency, goals, and personality.",
+            "GROUP — A collection of beings or entities acting with shared purpose or identity.",
+            "STRUCTURE — A constructed form or building, from tents to towers, prisons to temples.",
+            "PHENOMENON — A natural or strange happening, anomaly, or supernatural process.",
+            "SCENERY — Terrain, landscapes, and paths that form the backdrop or obstacle.",
+            "FLORA — Plants, trees, fungi*, or botanical life, whether mundane or magical.",
+            "TRACE — A sign, mark, inscription, residue, or symbolic remnant left behind by something else.",
+            "SUBSTANCE — A material, element, or essence with distinctive properties or uses."
+        ],
+        trait: [
+          { name: "AGENDA / PURPOSE", desc: "Reframe what the Subject wants, needs, or was made to do. Assign new intention to the seemingly purposeless, delightful, or disturbing." },
+          { name: "AGENT / SOURCE", desc: "Replace who or what is responsible for an effect or event. Attribute causality to odd, hidden, or displaced sources." },
+          { name: "AUTONOMY / DEPENDENCE", desc: "Change how self-sufficient or reliant the Subject is. Suggest strange dependencies or unexpected independence." },
+          { name: "BEHAVIOR / ACTIVITY", desc: "Change what the Subject normally does, or what it is doing when encountered. Attribute actions or intent to things that should not have them." },
+          { name: "BENEFIT / BOON", desc: "Grant an unexpected advantage for engaging with the Subject. Reward curiosity, care, or chance with subtle or strange benefits." },
+          { name: "CHALLENGE", desc: "Redefine what kind of obstacle the Subject presents. Shift difficulty from force to etiquette, emotion, ritual, or restraint." },
+          { name: "COMMUNICATION", desc: "Change how—or whether—the Subject communicates. Use unexpected senses, media, symbols, or indirect methods of expression." },
+          { name: "COMPOSITION / STRUCTURE", desc: "Transform how the Subject is arranged or assembled. Play with what kinds of parts constitute the whole. Rearrange anatomy or structure in unusual configurations." },
+          { name: "CONDITION / STATUS", desc: "Alter how intact, ruined, improved, transformed, or affected the Subject is. Contrast unusual states with otherwise ordinary contexts." },
+          { name: "CONSEQUENCES / STAKES", desc: "Alter the risk, fallout, or significance of engaging with the Subject. Reframe the weight of choices and actions." },
+          { name: "CONTENTS / BELONGINGS", desc: "Define what the Subject carries, wears, contains, or is filled with. Use possessions and interiors to imply story or contradiction." },
+          { name: "COSTS / REQUIREMENTS", desc: "Impose strange conditions, rituals, sacrifices, or prerequisites for access or use. Make engagement contingent on meaning rather than effort." },
+          { name: "DISPOSITION / TEMPERAMENT", desc: "Alter the emotional tone, mood, personality, or vibe of the Subject. Create contrast by imposing attitudes that clash with expectation or stereotype." },
+          { name: "DUALITY / DISGUISE", desc: "Make the Subject more than it appears—or something else entirely. Hide true nature, purpose, or identity behind a convincing surface." },
+          { name: "EFFECT / TARGET", desc: "Reframe who or what the Subject affects, and how. Bend the expected outcome of interaction or use." },
+          { name: "ENVIRONMENT / HABITAT", desc: "Consider where the Subject lives, comes from, or is expected to be found. Tamper with biomes, landscapes, weather, or ecological logic." },
+          { name: "LAWS / CUSTOMS", desc: "Tweak rules of physics, traditions, social norms, or natural laws. Redefine what is considered normal to create playful or alien logic." },
+          { name: "LOCATION / PLACEMENT", desc: "Place the Subject in unexpected or illogical positions in space or dimension. Alter context, alignment, orientation, surfaces, or containment." },
+          { name: "MANIFESTATION", desc: "Change how an expected effect materializes. Introduce unexpected forms, channels, styles, or intermediaries between cause and outcome." },
+          { name: "MATERIAL / STATE", desc: "Change the material, color, texture, or state of matter. Solidify liquids, fluidify solids, or introduce impossible materials that contrast with the Subject’s context or utility." },
+          { name: "MOBILITY / ANIMATION", desc: "Make the unmoving mobile, the mobile still, or alter expected patterns of movement. Introduce strange locomotion or suspended motion." },
+          { name: "NATURE / ESSENCE", desc: "Change whether the Subject is magical, mundane, synthetic, organic, divine, or conceptual. Alter its core essence to shift how it is perceived to exist." },
+          { name: "OPERATION / INTERACTION", desc: "Modify how the Subject is used, activated, or manipulated. Subvert expected inputs, responses, or mechanisms." },
+          { name: "ORIGIN / PAST", desc: "Modify ancestry, creator, species, history, or background. Elevate the mundane into myth, or reduce the legendary to something ordinary." },
+          { name: "PERCEPTION", desc: "Tweak how or whether the Subject can be perceived. Limit or condition visibility, audibility, or awareness through angle, emotion, or circumstance." },
+          { name: "POWER / CAPABILITY", desc: "Shift how powerful the Subject is, or what kind of ability it possesses. Undercut legendary power or elevate trivial influence." },
+          { name: "QUANTITY", desc: "Alter how many of the Subject exist or appear. Play with numbers of individual parts of the Subject. Using excess or scarcity can be surreal, humorous, or ominous." },
+          { name: "QUIRKS / DETAILS", desc: "Add eccentric features, mannerisms, peculiarities, or inconsistencies. Focus on small oddities that resist easy categorization." },
+          { name: "RESOURCE / SUPPLY", desc: "Change what the Subject provides when used or explored. Replace expected rewards with poetic, ironic, or surprising yields." },
+          { name: "SCALE", desc: "Alter the actual size of the Subject to emphasize contrast with its surroundings and the characters. Use it to make the familiar feel overwhelming—or the epic, strangely intimate." },
+          { name: "SENSORY PROFILE", desc: "Manipulate smell, sound, temperature, texture, or taste. Engage multiple senses at once, including unexpected or synesthetic combinations." },
+          { name: "SENTIENCE / WISDOM", desc: "Adjust the level of awareness or knowledge of the Subject. Grant intelligence or insight to unexpected or inconspicuous things." },
+          { name: "SHAPE / PROPORTION", desc: "Modify form, symmetry, or part-to-whole balance. Bend geometry and the position of parts. Exaggerate and contrast proportions." },
+          { name: "SIMILARITY / DIVERSITY", desc: "Alter the degree of sameness or variation among instances of the Subject. Play with uniformity, irregularity, symmetry, or pattern." },
+          { name: "SYMBOLISM / CONNECTION", desc: "Reveal hidden significance, mythic resonance, or narrative importance. Tie the Subject to characters, prophecies, or unfolding stories." },
+          { name: "TEMPORALITY / PERMANENCE", desc: "Disrupt expectations of age, timing, duration, or sequence. Introduce anachronism, cycles, reversals, or fleeting existence." }
+        ],
+        shift: [
+          { name: "AUGMENT", desc: "What can be enhanced? What would make it stand out? What can be added?" },
+          { name: "COMBINE", desc: "What could it fuse with? What other idea could you merge into it?" },
+          { name: "DIMINISH", desc: "What’s smaller or less than expected? What can be reduced or faded?" },
+          { name: "DISGUISE", desc: "How can it be hidden? What makes it hard to recognize? How would it trick the viewer?" },
+          { name: "ELIMINATE", desc: "What if it’s gone? What does its absence reveal? What takes its place?" },
+          { name: "EXAGGERATE", desc: "What can be turned up to eleven? What would feel extreme? How does it overwhelm?" },
+          { name: "DISTORT", desc: "What if it’s twisted? What breaks its logic or form? What feels “off”?" },
+          { name: "DIVIDE", desc: "How is it split? Where does the logic fork? What tension exists between the halves?" },
+          { name: "DUPLICATE", desc: "Are they exact copies or variations? Do they overlap or remain apart?" },
+          { name: "DYNAMIZE", desc: "What moves, pulses, grows, or changes over time? What adds motion or tension?" },
+          { name: "FRAGMENT", desc: "How is it broken apart? Can the pieces act on their own? How do they relate?" },
+          { name: "INVERT", desc: "What’s its opposite? What happens if roles reverse? What if it is turned inside out?" },
+          { name: "JUXTAPOSE", desc: "What happens when the unexpected overlap? What does the clash bring forth?" },
+          { name: "MAGNIFY", desc: "What if we zoom in? What tiny thing becomes important? What detail dominates?" },
+          { name: "MERGE", desc: "What fusion creates something new? What blurs the line between things?" },
+          { name: "MORPH", desc: "What’s in flux? How does it shift or evolve? What bridges two identities?" },
+          { name: "MULTIPLY", desc: "What should be one, but isn’t? What repeats across space or time?" },
+          { name: "SEPARATE", desc: "What if it stands alone? How does it manifest when disconnected from its source?" }
+        ],
+        seeds: {
+          seed1: ["Suspended", "Twisting", "Lush", "Sticky", "Sinking", "Wild", "Precious", "Broken", "Barbed", "Bleak", "Ant", "Squishy", "Isolated", "Wandering", "Dry", "Bee", "Marked", "Fragrant", "Liquefying", "Dusty", "Sharp", "Scented", "Twitching", "Blinding", "Beetle", "Burning", "Buried", "Ghastly", "Infecting", "Pulsing", "Hallowed", "Flooded", "Oscillating", "Birdcage", "Fortified", "Nightmare", "Boiling", "Colorless", "Pale", "Nauseating", "Icy", "Merry", "Bending", "Inhabited", "Infested", "Abyssal", "Shiny", "Melancholy", "Conceal", "Mutating", "Watery", "Prancing", "Slippery", "Drain", "Squeaky", "Lavish", "Wailing", "Shimmering", "Lonely", "Forlorn", "Spinning", "Infernal", "Bubble", "Empty", "Festive", "Damaged", "Fur", "Overgrown", "Warm", "Whistling", "Loud", "Sundered", "Rough", "Goat", "Gooey", "Blossoming", "Sealed", "Cow", "Howling", "Irradiating", "Jolly", "Expansive", "Inflating", "Hidden", "Intoxicating", "Menacing", "Shoddy", "Scarred", "Wicked", "Colorful", "Blessed", "Dark", "Blighted", "Crafted", "Foreseeing", "Enraging", "Damp", "Barren", "Creepy", "Frosty", "Bellowing", "Endless", "Frozen", "Dead", "Bloodied", "Bursting", "Foul", "Vibrant", "Bitter", "Shattered", "Stinky", "Smooth", "Reckless", "Weak", "Exposed", "Stylish", "Scorched", "Sunken", "Desolate", "Dreaded", "Flying", "Ensnaring", "Piercing", "Absorbing", "Confined", "Preserved", "Treacherous", "Immovable", "Glittering", "Destroyed", "Sheltered", "Card", "Misty", "Roaring", "Ghostly", "Eroded", "Dirty", "Rugged", "Petrified", "Silent", "Disk", "Unstable", "Rustic", "Sickly", "Fallen", "Withered", "Floating", "Dove", "Hardened", "Swinging", "Rotten", "Moldy", "Cold", "Blazing", "Perfumed", "Singing", "Wobbling", "Deep", "Deafening", "Cursed", "Talking", "Harsh", "Glowing", "Shrouded", "Saddening", "Levitating", "Desecrated", "Crumble", "Dancing", "Cacophonous", "Shivering", "Shadowy", "Ancient", "Prickly", "Freezing", "Toxic", "Whispering", "Ruined", "Indestructible", "Hostile", "Trapped", "Stretching", "Forgotten", "Terrifying", "Deadly", "Valuable", "Multiplying", "Haunted", "Collapsed", "Sacred", "Lethal", "Corroding", "Carriage", "Filthy", "Ashen", "Carved", "Ravaged", "Lively", "Grotesque", "Loathsome", "Forsaken", "Towering", "Faded", "Smoking", "Lost", "Fragile", "Earrings", "Abandoned", "Shaking", "Card", "Grim", "Dying", "Tainted", "Brittle", "Oozing", "Corrupt"],
+          seed2: ["Lantern", "Flag", "Cup", "Cipher", "Doll", "Elephant", "Lion", "Fear", "Exit", "Crab", "Cyclone", "Catacomb", "Brain", "Blood", "Beast", "Bird", "Glove", "Ink", "Lighthouse", "Constellation", "Cannon", "Fang", "Aura", "Fissure", "Dagger", "Claw", "Bolt", "Dragonfly", "Boomerang", "Cloak", "Beacon", "Fireplace", "Hand", "Grave", "Knight", "Disguise", "Brooch", "Cauldron", "Anchor", "Desert", "Fog", "Footprint", "Crystal", "Egg", "Gargoyle", "Colossus", "Gods", "Keep", "Bow", "Dragon", "Diagram", "Knot", "Hook", "Globe", "Blade", "Burrow", "Frost", "Dream", "Horse", "Lens", "Gauntlet", "Boar", "Decay", "Ghost", "Forest", "Circle", "Compass", "Coffin", "Cocoon", "Lava", "Hound", "Letter", "Leech", "Heart", "Lock", "Death", "Fist", "Arch", "Guardian", "Helmet", "Hat", "Candle", "Beak", "Disease", "Hourglass", "Glass", "Keyhole", "Frontier", "Crossroads", "Inn", "Blob", "Eye", "Lyre", "Fox", "Acid", "Language", "Lizard", "Horn", "Jester", "Depths", "Gemstone", "Flood", "Golem", "Avalanche", "Bridge", "Horseshoe", "Bell", "Flesh", "Gold", "Fume", "Incense", "Dust", "Dance", "Chandelier", "Chariot", "Library", "Ice", "Carcass", "Key", "Hawk", "Axe", "Heat", "Eagle", "Chapel", "Imp", "Anvil", "Lightning", "Crossbow", "Hare", "Mill", "Iron", "Cat", "Foam", "Chalice", "Faith", "Fungi", "Geyser", "Fountain", "Light", "Destruction", "Lair", "Lute", "Amulet", "Ivory", "Cross", "Column", "Lamp", "Amber", "Lamb", "Giant", "Insect", "Garden", "Bull", "Cage", "Link", "Fire", "Castle", "Gate", "Ash", "Fort", "Arrow", "Hive", "Comet", "Earthquake", "Flame", "Coin", "Earth", "Fossil", "Leaf", "Chimp", "Crow", "Hole", "Dungeon", "Eclipse", "Altar", "Griffin", "Darkness", "Candelabra", "Bone", "Crown", "Blossom", "Helix", "Feather", "Butterfly", "Knife", "Door", "Chest", "Harp", "Coil", "Hamlet", "Bear", "Corruption", "Astrolabe", "Canyon", "Dice", "Balance", "Deer", "Cube", "Flower", "Honey", "Jar", "Harpy", "Corpse", "Diamond", "Cairn", "Bonfire", "Locket", "Antlers", "Fish", "Loose", "Geometry", "Hog", "Carvings", "Cloud", "Armor", "Cave"],
+          seed3: ["Prayer", "Sound", "Pen", "Trident", "Occult", "Peaks", "Flute", "Pyramid", "Watch", "Rune", "Moss", "Mouse", "Bottle", "Swamp", "Mud", "Throne", "Wave", "Sphere", "Scepter", "Rot", "Pillar", "Smoke", "Nest", "Road", "Statue", "Pearl", "River", "Path", "Scale", "Machine", "Book", "Spike", "Time", "Bracelet", "Staff", "Sap", "Water", "Octopus", "Prison", "Skull", "Void", "Wood", "Orb", "Tavern", "Rose", "Weapon", "Shield", "Tundra", "Moon", "Planes", "Branch", "Gear", "Relic", "Spring", "Whip", "Whale", "Tool", "Ray", "Tentacle", "Ear", "Weasel", "Worm", "Ritual", "Portrait", "Unicorn", "Raven", "Mountain", "Rat", "Tar", "Tear", "Tornado", "Wolf", "Obelisk", "Spark", "Mist", "Sickle", "Pickaxe", "Vulture", "Shoe", "Voice", "Vial", "Spider", "Monument", "Rain", "Rubble", "Sand", "Target", "Shrine", "Medal", "Seedling", "Snowglobe", "Volcano", "Necklace", "Scroll", "Web", "Pig", "Wall", "Alchemy", "Sea", "Monolith", "Rust", "Pendulum", "Spore", "Tree", "Ribbon", "Word", "Scabbard", "Tooth", "Well", "Slime", "War", "Pulse", "Music", "Pipe", "Spices", "Symbol", "Owl", "Serpent", "Root", "Winter", "Puzzle", "Scythe", "Telescope", "Torch", "Mace", "Scorpion", "Night", "Trunk", "Vermin", "Clock", "Paper", "Saber", "Pincer", "Needle", "Storm", "Sword", "Wax", "Tunnel", "Snowflake", "Mosaic", "Port", "Sun", "Temple", "Stairs", "Wing", "Crate", "Spiral", "Undead", "Oil", "Song", "Mask", "Trash", "Sign", "Tomb", "Nectar", "Mirror", "Ruin", "Nose", "Treasure", "Turtle", "Portal", "Spell", "Prophecy", "Vortex", "Trap", "Message", "Ring", "Spear", "Wand", "Mine", "Rabbit", "Thorn", "Stone", "Chain", "Poison", "Star", "Fruit", "Maze", "Skeleton", "Wheel", "Stump", "Paw", "Stake", "Veil", "Space", "Snail", "Steam", "Wind", "Perfume", "Cabinet", "Frog", "Shadow", "Organ", "Vase", "Pollen", "Skin", "Soul", "Poem", "Sacrifice", "Mouth", "Vine", "Skies", "Map", "Trail", "Potion", "Tower", "Mechanism", "Soot", "Finger", "Origami", "Shell", "Monster", "Face", "Triangle", "Trophy", "Pit"]
+        },
+      flavor: {
+        weird: ["Unsettling", "Mysterious", "Uneasy", "Uncanny", "Surreal", "Eerie", "Alien", "Anomalous", "Bizarre", "Odd", "Illogical", "Tense", "Ambiguous", "Absurd", "Uncertainty", "Discomfort"],
+        whimsy: ["Adorable", "Fun", "Playful", "Quirky", "Humorous", "Silly", "Heartwarming", "Delightful", "Lighthearted", "Dream-like", "Endearing", "Low stakes", "Charming", "Curiosity"],
+        wonder: ["Grandeur", "Beauty", "Majestic", "Awe-inspiring", "Breathtaking", "Epic", "Sacred", "Uplifting", "Profound", "Inspiring", "Miraculous", "Marvelous", "Boundless", "Enchanting", "Glorious", "Legendary"]
+      },
+      framing: {
+          frame1: ["Sight / Detail", "Light / Shadow", "Smell / Taste", "Sound / Silence", "Texture / Material", "Temperature / Weather"],
+          frame2: ["Shape / Size", "Palette / Contrast", "Ornament / Patterns", "Landform / Architecture", "Layout / Arrangement", "Occupancy / Absence"],
+          frame3: ["Mood / Emotion", "Movement / Stillness", "Posture / Attitude", "Focus / Angle", "Impression / Opinion", "Backdrop / Context"]
+        },
+      logoMsgs: [
+        "Go with WEIRD.",
+        "Try something WEIRD.",
+        "Lean into the WEIRD.",
+        "Go with WHIMSY.",
+        "Try something WHIMSICAL.",
+        "Lean into WHIMSY.",
+        "Go with WONDER.",
+        "Try something WONDROUS.",
+        "Lean into WONDER.",
+        "Combine WEIRD + WHIMSY.",
+        "Blend WHIMSY + WEIRD.",
+        "Combine WHIMSY + WONDER.",
+        "Blend WONDER + WHIMSY.",
+        "Combine WONDER + WEIRD.",
+        "Blend WEIRD + WONDER.",
+        "Combine WEIRD + WHIMSY + WONDER."
+      ]
+    };
+
+    /*****************************************************************
+     * 2) UTILITIES
+     *****************************************************************/
+    const $ = (id) => document.getElementById(id);
+
+    function rollFromArray(arr){
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // New Flash Animation
+    function animateField(el) {
+      el.classList.remove("flash");
+      void el.offsetWidth; // trigger reflow
+      el.classList.add("flash");
+    }
+
+    function showToast(msg){
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => t.classList.remove("show"), 1200);
+    }
+
+    function appendToScratch(text){
+      const ta = $("scratchpad");
+      const trimmed = (text ?? "").toString().trim();
+      if(!trimmed) return;
+
+      undoStack.push(ta.value);
+      ta.value = ta.value ? (ta.value.trimEnd() + "\n" + trimmed) : trimmed;
+      ta.scrollTop = ta.scrollHeight;
+      persistScratch();
+      showToast("Saved to scratchpad");
+    }
+
+    /*****************************************************************
+     * 3) ROLLERS
+     *****************************************************************/
+    function rollSubject(){
+      const el = $("subjectField");
+      el.textContent = rollFromArray(OPTIONS.subject);
+      animateField(el);
+    }
+
+    function rollTrait(){
+      const t = rollFromArray(OPTIONS.trait);
+      const el = $("traitField");
+      if (typeof t === "string") {
+        el.textContent = t;
+        $("traitDesc").textContent = "";
+      } else {
+        el.textContent = t.name;
+        $("traitDesc").textContent = t.desc || "";
+      }
+      animateField(el);
+      $("traitDetails").open = false;
+    }
+
+    function rollShift(){
+      const s = rollFromArray(OPTIONS.shift);
+      const el = $("shiftField");
+      if (typeof s === "string") {
+        el.textContent = s;
+        $("shiftDesc").textContent = "";
+      } else {
+        el.textContent = s.name;
+        $("shiftDesc").textContent = s.desc || "";
+      }
+      animateField(el);
+      $("shiftDetails").open = false;
+    }
+
+    function rollSeed(slot){
+      const key = "seed" + slot;
+      const el = $(key + "Field");
+      el.textContent = rollFromArray(OPTIONS.seeds[key]);
+      animateField(el);
+    }
+
+    function rollFlavor(which){
+      const el = $(which + "Field");
+      el.textContent = rollFromArray(OPTIONS.flavor[which]);
+      animateField(el);
+    }
+
+    function rollFraming(slot){
+      const key = "frame" + slot;
+      const el = $(key + "Field");
+      el.textContent = rollFromArray(OPTIONS.framing[key]);
+      animateField(el);
+    }
+
+    function rollSection(section){
+      switch(section){
+        case "seeds":
+          rollSeed(1); rollSeed(2); rollSeed(3);
+          break;
+        case "flavor":
+          rollFlavor("weird"); rollFlavor("whimsy"); rollFlavor("wonder");
+          break;
+        case "framing":
+          rollFraming(1); rollFraming(2); rollFraming(3);
+          break;
+      }
+    }
+
+    async function rollAll(){
+      rollSubject();
+      await new Promise(r => setTimeout(r, 50));
+      rollTrait();
+      await new Promise(r => setTimeout(r, 50));
+      rollShift();
+      await new Promise(r => setTimeout(r, 50));
+      rollSection("seeds");
+      await new Promise(r => setTimeout(r, 50));
+      rollSection("flavor");
+      await new Promise(r => setTimeout(r, 50));
+      rollSection("framing");
+    }
+
+    /*****************************************************************
+     * 4) SCRATCHPAD
+     *****************************************************************/
+    const LS_KEY = "www_scratchpad_v1";
+    const undoStack = [];
+
+    function persistScratch(){
+      try { localStorage.setItem(LS_KEY, $("scratchpad").value); } catch(e) {}
+    }
+
+    function restoreScratch(){
+      try {
+        const v = localStorage.getItem(LS_KEY);
+        if (v != null) $("scratchpad").value = v;
+      } catch(e) {}
+    }
+    
+    // Improved Dock Resize Logic
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        // Add buffer so content scrolls above dock
+        document.body.style.paddingBottom = (entry.contentRect.height + 30) + "px";
+      }
+    });
+    resizeObserver.observe($("scratchDock"));
+
+    /*****************************************************************
+     * 5) EVENTS
+     *****************************************************************/
+    $("rollAllBtn").addEventListener("click", rollAll);
+
+    $("logoBtn").addEventListener("click", () => {
+      showToast(rollFromArray(OPTIONS.logoMsgs));
+    });
+
+    document.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-action]");
+      if(!el) return;
+
+      const action = el.getAttribute("data-action");
+
+      if(action === "roll-section"){
+        rollSection(el.getAttribute("data-section"));
+      }
+
+      if(action === "roll-field"){
+        const field = el.getAttribute("data-field");
+        if(field.startsWith("seed") && field.length === 5) rollSeed(field.charAt(4));
+        else if(field.startsWith("frame") && field.length === 6) rollFraming(field.charAt(5));
+        else if(["subject","trait","shift","weird","whimsy","wonder"].includes(field)){
+             if(field==="subject") rollSubject();
+             if(field==="trait") rollTrait();
+             if(field==="shift") rollShift();
+             if(field==="weird") rollFlavor("weird");
+             if(field==="whimsy") rollFlavor("whimsy");
+             if(field==="wonder") rollFlavor("wonder");
+        }
+      }
+
+      if(action === "stash-single"){
+        const kind = el.getAttribute("data-kind");
+
+        if(kind === "seed"){
+          const slot = el.getAttribute("data-slot");
+          const text = $("seed" + slot + "Field").textContent.trim();
+          if(text && text !== "—") appendToScratch("SEED: " + text);
+        }
+
+        if(kind === "flavor"){
+          const flavorName = el.getAttribute("data-flavor"); 
+          let fieldId = flavorName.toLowerCase() + "Field";
+          const text = $(fieldId).textContent.trim();
+          if(text && text !== "—") appendToScratch("FLAVOR: (" + flavorName + ") " + text);
+        }
+
+        if(kind === "framing"){
+          const slot = el.getAttribute("data-slot");
+          const text = $("frame" + slot + "Field").textContent.trim();
+          if(text && text !== "—") appendToScratch("FRAMING: " + text);
+        }
+      }
+
+      if(action === "stash"){
+        const which = el.getAttribute("data-field");
+
+        if(which === "subject") {
+          appendToScratch("SUBJECT: " + $("subjectField").textContent);
+        }
+
+        else if(which === "trait") {
+          const name = $("traitField").textContent.trim();
+          const desc = $("traitDesc").textContent.trim();
+          if(name !== "—") appendToScratch("TRAIT: " + name + (desc ? (" — " + desc) : ""));
+        }
+
+        else if(which === "shift") {
+          const name = $("shiftField").textContent.trim();
+          const desc = $("shiftDesc").textContent.trim();
+          if(name !== "—") appendToScratch("SHIFT: " + name + (desc ? (" — " + desc) : ""));
+        }
+
+        else if(which === "seeds") {
+          const t = [
+            $("seed1Field").textContent,
+            $("seed2Field").textContent,
+            $("seed3Field").textContent
+          ].filter(x => x !== "—").join(" — ");
+          if(t) appendToScratch("SEEDS: " + t);
+        }
+
+        else if(which === "flavor") {
+          const t = [
+            "(Weird) " + $("weirdField").textContent,
+            "(Whimsy) " + $("whimsyField").textContent,
+            "(Wonder) " + $("wonderField").textContent
+          ].filter(x => !x.includes("—")).join(" — ");
+          if(t) appendToScratch("FLAVOR: " + t);
+        }
+
+        else if(which === "framing") {
+          const t = [
+            $("frame1Field").textContent,
+            $("frame2Field").textContent,
+            $("frame3Field").textContent
+          ].filter(x => x !== "—").join(" — ");
+          if(t) appendToScratch("FRAMING: " + t);
+        }
+      }
+    });
+
+    $("scratchpad").addEventListener("input", persistScratch);
+
+    $("copyBtn").addEventListener("click", async () => {
+      const text = $("scratchpad").value;
+      if (!text) return;
+      
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("Copied");
+      } catch (err) {
+        const ta = $("scratchpad");
+        ta.select();
+        document.execCommand("copy");
+        window.getSelection().removeAllRanges();
+        showToast("Copied");
+      }
+    });
+
+    $("clearBtn").addEventListener("click", () => {
+      const ta = $("scratchpad");
+      if(!ta.value) return;
+      undoStack.push(ta.value);
+      ta.value = "";
+      persistScratch();
+      showToast("Cleared");
+    });
+
+    $("undoBtn").addEventListener("click", () => {
+      if(!undoStack.length) return;
+      $("scratchpad").value = undoStack.pop();
+      persistScratch();
+      showToast("Undone");
+    });
+
+    /*****************************************************************
+     * 6) INIT
+     *****************************************************************/
+    restoreScratch();
+    rollAll();
+  </script>
+</body>
+</html>
