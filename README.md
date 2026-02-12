@@ -9,8 +9,8 @@ For use with Weird, Whimsy & Wonder, available at https://capacle.itch.io/weird-
 
 
 ## Live version
-https://capacle.github.io/weirdwhimsywonder/index.html
-
+[https://capacle.github.io/weirdwhimsywonder/index.html
+](https://capacle.github.io/weirdwhimsywonder/)
 ## Offline use
 Download `index.html` and open it in any browser.
 
