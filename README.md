@@ -1,5 +1,5 @@
 # Weird, Whimsy & Wonder
-A lightweight, single-file roller for strange, playful, and wondrous prompts.
+A lightweight, single-file roller for strange, playful, and wondrous prompts.  
 For use with Weird, Whimsy & Wonder, available at https://capacle.itch.io/weird-whimsy-wonder
 
 - Click to roll on individual entries, entire sections or the whole page
@@ -9,8 +9,8 @@ For use with Weird, Whimsy & Wonder, available at https://capacle.itch.io/weird-
 
 
 ## Live version
-[https://capacle.github.io/weirdwhimsywonder/index.html
-](https://capacle.github.io/weirdwhimsywonder/)
+https://capacle.github.io/weirdwhimsywonder/
+
 ## Offline use
 Download `index.html` and open it in any browser.
 
