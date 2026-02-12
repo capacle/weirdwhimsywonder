@@ -4,8 +4,8 @@ For use with Weird, Whimsy & Wonder, available at https://capacle.itch.io/weird-
 
 - Click to roll on individual entries, entire sections or the whole page
 - Click on the emoji to get a random flavor
-- Save rolls to the sketchpad to keep track of your creations
-- Edit the text in the sketchpad freely
+- Save rolls to the scratchpad to keep track of your creations
+- Edit the text in the scratchpad freely
 
 
 ## Live version
